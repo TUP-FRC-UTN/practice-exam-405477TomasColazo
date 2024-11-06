@@ -6,7 +6,8 @@
   <div class="card">
     <div class="card-body row">
       <div class="col-12">
-        <input class="form-control" type="text" placeholder="Search by customer name or email...">
+        <input class="form-control" type="text" placeholder="Search by customer name or email..."
+        [(ngModel)]="searchTerm" (input)="filterOrders()">
       </div>
       <table class="table">
         <thead>
@@ -20,7 +21,7 @@
         </tr>
         </thead>
         <tbody>
-          @for (order of orders;track $index){
+          @for (order of filteredOrders;track $index){
             <tr>
               <th scope="row">{{order.orderCode}}</th>
               <td>{{order.customerName}}</td>
