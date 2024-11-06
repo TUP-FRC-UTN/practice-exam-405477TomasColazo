@@ -1,0 +1,132 @@
+<div class="container">
+  <h1 class="mb-4 mt-3">Create new order</h1>
+  <!--formgroup nombre y email-->
+  <form [formGroup]="newOrderForm"  class="row g-3 needs-validation" (ngSubmit)="saveOrder()" novalidate>
+    <div class="col-6 mb-3">
+      <label class="form-label" for="input_name">Nombre:</label>
+      <input type="text" class="form-control" id="input_name" placeholder="Ingrese su nombre..." formControlName="name"
+      [ngClass]="{'is-invalid':newOrderForm.get('name')?.invalid && newOrderForm.get('name')?.touched}">
+      <div class="invalid-feedback">
+        @if (newOrderForm.get("name")?.hasError("required")){
+          <span>Debe ingresar un nombre</span>
+        } @else if (newOrderForm.get("name")?.hasError("minlength")){
+          <span>El nombre debe poseer al menos 3 caracteres</span>
+        }
+      </div>
+    </div>
+    <div class="col-6 mb-3">
+      <label class="form-label" for="input-email">Email:</label>
+      <input type="email" class="form-control" id="input-email" placeholder="Ingrese su email..." formControlName="email"
+      [ngClass]="{'is-invalid':newOrderForm.get('email')?.invalid && newOrderForm.get('email')?.touched}">
+      <div class="invalid-feedback">
+        @if (newOrderForm.get("email")?.hasError("required")){
+          <span>Debe ingresar un email</span>
+        } @else if (newOrderForm.get("email")?.hasError("email")){
+          <span>Debe ingresar un mail valido</span>
+        } @else if (newOrderForm.get("email")?.hasError("orderLimit")){
+          <span>El usuario ya ha realizado mas de 3 pedidos</span>
+        }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header row">
+       <div class="col-10">
+         <h3 class="">Productos</h3>
+       </div>
+        <div class="col-2 text-end">
+          <button class="btn btn-primary bi bi-plus-lg " type="button" (click)="newDetail()"></button>
+        </div>
+      </div>
+      <div class="card-body" formArrayName="products" [ngClass]="{'is-invalid':newOrderForm.get('products')?.invalid}">
+        <div class="alert alert-danger" *ngIf="newOrderForm.get('products')?.invalid && ( newOrderForm.get('products')?.touched)
+        && getFormErrors().length>0">
+          @for (error of getFormErrors(); track error) {
+            <p class="mb-0">{{ error }}</p>
+          }
+        </div>
+        @for (detail of productDetails;track detail.id){
+          <form [formGroup]="detail.formGroup" class="needs-validation row mb-3" novalidate>
+            <div class="col-5">
+              <label class="form-label" for="select_product">Product</label>
+              <select class="form-control" id="select_product" formControlName="productName"
+              [ngClass]="{'is-invalid':detail.formGroup.get('productName')?.invalid && detail.formGroup.get('productName')?.touched}">
+                <option value="">Seleccione un producto...</option>
+                @for (product of $products;track $index){
+                  <option [value]="product.id">{{product.name}}</option>
+                }
+              </select>
+              <div class="invalid-feedback">
+                @if (detail.formGroup.get('productName')?.hasError('required')){
+                  <span>Seleccion un producto</span>
+                }
+              </div>
+            </div>
+            <div class="col-2">
+              <label class="form-label" for="input_quantity">Cantidad</label>
+              <input type="number" class="form-control" id="input_quantity" min="1" formControlName="quantity"
+              [ngClass]="{'is-invalid':detail.formGroup.get('quantity')?.invalid && detail.formGroup.get('quantity')?.touched}">
+              <div class="invalid-feedback">
+                @if (detail.formGroup.get('quantity')?.hasError('pattern')){
+                  <span>Ingrese unicamente caracteres numericos</span>
+                } @else if (detail.formGroup.get('quantity')?.hasError('min')){
+                  <span>Debe ingresar una cantidad valida</span>
+                }@else if (detail.formGroup.get('quantity')?.hasError('required')){
+                  <span>Debe ingresar una cantidad valida</span>
+                } @else if (detail.formGroup.get('quantity')?.hasError('moreThanStock')){
+                  <span>No puede ingresar una cantidad mayor a la disponible en stock.</span>
+                }
+              </div>
+            </div>
+            <div class="col-2">
+              <label class="form-label" for="input_price" >Precio</label>
+              <input type="number" class="form-control" id="input_price" formControlName="price" [readOnly]="true">
+            </div>
+            <div class="col-2">
+              <label class="form-label" for="input_stock" >Stock</label>
+              <input type="number" class="form-control" id="input_stock" formControlName="stock" [readOnly]="true">
+            </div>
+            <div class="col-1 align-content-end">
+              <button type="button" class="btn btn-danger bi bi-trash-fill " (click)="dropDetail(productDetails.indexOf(detail))"></button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+    <div class="card">
+     <div class="card-header row">
+       <h3>Productos Seleccionados</h3>
+     </div>
+      <div class="card-body">
+        <ul class="list-group">
+          @for (product of productDetails;track product.id){
+            @if (!product.formGroup.invalid){
+              <li class="list-group-item">
+                {{detailText(product.formGroup)}}
+              </li>
+            }
+          }
+        </ul>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body row">
+        <div class="col-6"></div>
+        <div class="col-3 text-start">
+          <p>Total:</p>
+          <span *ngIf="total>1000" style="color: green">Se aplico un 10% de descuento</span>
+        </div>
+        <div class="col-3 text-end">
+          <p *ngIf="total<=1000">${{total}}</p>
+          <p *ngIf="total > 1000">{{total*.9}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-10"></div>
+      <button class="btn-primary btn col-2" type="submit">Crear orden</button>
+    </div>
+  </form>
+<!-- form array para prodcuts -->
+</div>
