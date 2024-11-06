@@ -23,8 +23,8 @@
           <span>Debe ingresar un email</span>
         } @else if (newOrderForm.get("email")?.hasError("email")){
           <span>Debe ingresar un mail valido</span>
-        } @else if (newOrderForm.get("email")?.hasError("orderLimit")){
-          <span>El usuario ya ha realizado mas de 3 pedidos</span>
+        } @else if (newOrderForm.get("email")?.hasError("orderLimit")) {
+          <span>El usuario ya ha realizado más de 3 pedidos en las últimas 24 horas</span>
         }
       </div>
     </div>

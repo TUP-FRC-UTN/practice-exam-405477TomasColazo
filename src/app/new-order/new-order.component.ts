@@ -35,12 +35,16 @@ export class NewOrderComponent implements OnInit {
     this.product_service.products.subscribe(products => {
       this.$products = products;
     })
+    this.newOrderForm.get('email')?.statusChanges.subscribe(status => {
+      console.log('Email status:', status);
+      console.log('Email errors:', this.newOrderForm.get('email')?.errors);
+    });
   }
   newOrderForm = new FormGroup({
     name: new FormControl('', [Validators.required,Validators.minLength(3)]),
-    email: new FormControl('', [Validators.required, Validators.email], [this.order_service.validEmail()]),
+    email: new FormControl('', [Validators.required, Validators.email], [this.order_service.validEmail()],),
     products: new FormArray([],[duplicates,atLeastOneProduct,lessThan10Products]),
-  })
+  },{updateOn:"blur"})
 
   get details(): FormArray {
     return this.newOrderForm.get('products') as FormArray;
@@ -66,6 +70,7 @@ export class NewOrderComponent implements OnInit {
   }
 
   newDetail(){
+    this.newOrderForm.controls["products"].markAsTouched();
     const fb = new FormGroup({
       productName: new FormControl('', [Validators.required]),
       quantity: new FormControl(1, [Validators.required,Validators.pattern(/^[0-9]*$/),Validators.min(1),moreThanStock]),
@@ -135,6 +140,9 @@ export class NewOrderComponent implements OnInit {
 
   saveOrder() {
     console.log("hola")
+    Object.values(this.newOrderForm.controls).forEach(control => {
+      control.markAsTouched();
+    });
     if (this.newOrderForm.valid) {
       const selectedProducts = this.productDetails.map(detail =>{
         const productId = detail.formGroup.get('id')?.value;
